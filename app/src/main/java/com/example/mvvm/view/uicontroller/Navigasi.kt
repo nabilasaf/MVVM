@@ -6,10 +6,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.mvvm.model.DataJK.JenisK
+import com.example.mvvm.view.FormSiswa
+import com.example.mvvm.view.TampilSiswa
 import com.example.mvvm.viewmodel.SiswaViewModel
 
 enum class Navigasi {
@@ -29,7 +35,25 @@ fun SiswaApp(
         NavHost(
             navController = navController,
             startDestination = Navigasi.Formulir.name,
-            modifier = Modifier.padding(isiRuang)
-        ){}
-    }
+            modifier = Modifier.padding(isiRuang)) {
+                composable (route = Navigasi.Formulir.name){
+                    val konteks = LocalContext.current
+                    FormSiswa(
+                        modifier = Modifier,
+                        pilihanJK = JenisK.map {id -> konteks.resources.getString(id)},
+                        onSubmit = {
+                            viewModel.setSiswa(it)
+                            navController.navigate(Navigasi.Detail.name)
+                        }
+                    )
+                }
+                composable (route = Navigasi.Detail.name ){
+                    TampilSiswa(
+                        statusUiSiswa = uiState.value,
+                        onBack = {cancleAndBackToFormulir(navController)}
+                    )
+                }
+            }
+        }
 }
+
